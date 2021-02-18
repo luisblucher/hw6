@@ -1,3 +1,4 @@
+
 // First, sign up for an account at https://themoviedb.org
 // Once verified and signed-in, go to Settings and create a new
 // API key; in the form, indicate that you'll be using this API
@@ -68,34 +69,22 @@
 
 
 
-window.addEventListener('DOMContentLoaded', async function(event) {
+    window.addEventListener('DOMContentLoaded', async function(event) {
 
-    let db = firebase.firestore()
-    let response = await fetch('https://api.themoviedb.org/3/movie/now_playing?api_key=03e8e24206878cf11fcfb268243f73df&language=en-US')
-    let movies = await response.json()
-    console.log(movies)
+        let db = firebase.firestore()
+        let response = await fetch('https://api.themoviedb.org/3/movie/now_playing?api_key=03e8e24206878cf11fcfb268243f73df&language=en-US')
+        let movies = await response.json()
+    
+        let movieList = movies.results
+        let outputElement = document.querySelector('.movies')
+    
+        for (let i=0; i<movieList.length; i++) {
+            
+            let movieID = movieList[i].id
+            let moviePoster = movieList[i].poster_path
+            let querySnapshot = await db.collection('watchlist').get()
+            let watchedMovies = querySnapshot.docs
 
-    let movieList = movies.results
-    let outputElement = document.querySelector('.movies')
-
-    for (let i=0; i<movieList.length; i++) {
-        
-        let movieID = movieList[i].id
-        let moviePoster = movieList[i].poster_path
-        
-        let querySnapshot = await db.collection('TMDB').get()
-        let watchedMovies = querySnapshot.docs
-        let seenMovie = true
-
-        if(watchedMovies.length > 0){
-            let movieData = watchedMovies[0].data()
-            seenMovie = movieData.watched
-        }
-        else{
-            seenMovie = false
-        }
-
-        if(seenMovie){ 
             outputElement.insertAdjacentHTML('beforeend',`
             <div class="w-1/5 p-4 movie-${movieID}">
                 <img id="poster${movieID}" src="https://image.tmdb.org/t/p/w500${moviePoster}" class="w-full">
@@ -103,24 +92,26 @@ window.addEventListener('DOMContentLoaded', async function(event) {
             </div>
             `)
 
+            let watchButton = document.querySelector(`#button${movieID}`)
+            let uniqueMovie = document.querySelector(`#poster${movieID}`)
 
-        }
+            for (let j=0; j<watchedMovies.length; j++){
+                watchedMovie = watchedMovies[j]
+                watchedMovieID = watchedMovie.id
 
-
-  
-        let watchButton = document.querySelector(`#button${movieID}`)
-        let uniqueMovie = document.querySelector(`#poster${movieID}`)
-
-        watchButton.addEventListener('click', async function(event){
-            event.preventDefault()
-            uniqueMovie.classList.add('opacity-20')
-            watchButton.classList.add('opacity-20')
-            console.log(`${movieList[i].original_title} was watched.`)
-        })
-        
-        
-
-        let watchedMovies = querySnapshot.docs
+                if (watchedMovieID == movieID){
+                    uniqueMovie.classList.add('opacity-20')
+                    watchButton.classList.add('opacity-20')
+                }
+                else{
+                }
+            }
     
-    }
-  })
+            watchButton.addEventListener('click', async function(event){
+                event.preventDefault()
+                uniqueMovie.classList.add('opacity-20')
+                watchButton.classList.add('opacity-20')
+                db.collection('watchlist').doc(`${movieID}`).set({})
+            })        
+        }
+      })
