@@ -106,12 +106,22 @@
                 else{
                 }
             }
-    
-            watchButton.addEventListener('click', async function(event){
-                event.preventDefault()
-                uniqueMovie.classList.add('opacity-20')
-                watchButton.classList.add('opacity-20')
-                db.collection('watchlist').doc(`${movieID}`).set({})
-            })        
+
+            if(uniqueMovie.classList.contains('opacity-20')){
+                watchButton.addEventListener('click', async function(event){
+                    event.preventDefault()
+                    uniqueMovie.classList.remove('opacity-20')
+                    watchButton.classList.remove('opacity-20')
+                    db.collection('watchlist').doc(`${movieID}`).delete()
+                })   
+            }
+            else{
+                watchButton.addEventListener('click', async function(event){
+                    event.preventDefault()
+                    uniqueMovie.classList.add('opacity-20')
+                    watchButton.classList.add('opacity-20')
+                    db.collection('watchlist').doc(`${movieID}`).set({})
+                })   
+            }
         }
       })
